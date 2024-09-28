@@ -9,12 +9,30 @@ $pdo = new PDO(
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $order = isset($_GET['order']) ? $_GET['order'] : 'desc';
+$specific_date = isset($_GET['specific_date']) ? $_GET['specific_date'] : '';
 
-$sql =
-    'SELECT * FROM pages WHERE (name LIKE :search OR contents LIKE :search) ORDER BY created_at ' .
-    ($order === 'asc' ? 'ASC' : 'DESC');
+$sql = 'SELECT * FROM pages WHERE 1=1';
+
+if ($search) {
+    $sql .= ' AND (name LIKE :search OR contents LIKE :search)';
+}
+
+if ($specific_date) {
+    $sql .= ' AND DATE(created_at) = :specific_date';
+}
+
+$sql .= ' ORDER BY created_at ' . ($order === 'asc' ? 'ASC' : 'DESC');
+
 $statement = $pdo->prepare($sql);
-$statement->bindValue(':search', '%' . $search . '%', PDO::PARAM_STR);
+
+if ($search) {
+    $statement->bindValue(':search', '%' . $search . '%', PDO::PARAM_STR);
+}
+
+if ($specific_date) {
+    $statement->bindValue(':specific_date', $specific_date, PDO::PARAM_STR);
+}
+
 $statement->execute();
 $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -56,7 +74,14 @@ $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
             <span>古い順</span>
           </label>
         </div>
-        <button type="submit">検索</button>
+        <div>
+          <label>作成日：<input type="date" name="specific_date" value="<?php echo htmlspecialchars(
+              $specific_date,
+              ENT_QUOTES,
+              'UTF-8'
+          ); ?>"></label>
+        </div>
+        <button type="submit">検索・並び替え</button>
       </form>
     </div>
     
