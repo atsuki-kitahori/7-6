@@ -81,7 +81,7 @@ $pages = $statement->fetchAll(PDO::FETCH_ASSOC);
               'UTF-8'
           ); ?>"></label>
         </div>
-        <button type="submit">検索・並び替え</button>
+        <button type="submit">検索</button>
       </form>
     </div>
     
